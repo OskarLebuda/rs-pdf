@@ -20,8 +20,8 @@ jobs:
             cross: false
 
           - target: x86_64-apple-darwin
-            runner: macos-13
-            cross: false
+            runner: macos-latest
+            cross: true
 
           - target: x86_64-unknown-linux-gnu
             runner: ubuntu-22.04
@@ -68,15 +68,16 @@ jobs:
       - run: pnpm install --no-frozen-lockfile --no-optional
 
       - name: Build (native)
-        if: '!matrix.cross'
-        run: napi build --platform --release --output-dir dist --target ${{ matrix.target }}
+        if: "!matrix.cross"
+        run: pnpm exec napi build --platform --release --output-dir dist --target ${{ matrix.target }}
         env:
           MACOSX_DEPLOYMENT_TARGET: '10.13'
 
-      - name: Build (cross ARM64)
+      - name: Build (cross)
         if: matrix.cross
-        run: napi build --platform --release --output-dir dist --target ${{ matrix.target }}
+        run: pnpm exec napi build --platform --release --output-dir dist --target ${{ matrix.target }}
         env:
+          MACOSX_DEPLOYMENT_TARGET: '10.13'
           CC_aarch64_unknown_linux_gnu: aarch64-linux-gnu-gcc
           CXX_aarch64_unknown_linux_gnu: aarch64-linux-gnu-g++
           AR_aarch64_unknown_linux_gnu: aarch64-linux-gnu-ar
