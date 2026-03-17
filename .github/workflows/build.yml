@@ -65,7 +65,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
 
-      - run: pnpm install --frozen-lockfile --no-optional
+      - run: pnpm install --no-optional
 
       - name: Build (native)
         if: '!matrix.cross'
@@ -108,7 +108,7 @@ jobs:
           cache: pnpm
           registry-url: 'https://registry.npmjs.org'
 
-      - run: pnpm install --frozen-lockfile --no-optional
+      - run: pnpm install --no-optional
 
       - uses: actions/download-artifact@v4
         with:
