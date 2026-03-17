@@ -1,0 +1,16 @@
+{
+  "name": "rs-pdf-linux-arm64-gnu",
+  "version": "0.1.0",
+  "description": "rs-pdf native binding for Linux ARM64 (glibc)",
+  "license": "MIT",
+  "files": [
+    "rs-pdf.linux-arm64-gnu.node"
+  ],
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "main": "rs-pdf.linux-arm64-gnu.node"
+}
