@@ -106,7 +106,7 @@ export function pdfToHtml(path: string, options?: PdfConvertOptions): Promise<Pd
 /**
  * Convert a single page of a PDF to an HTML fragment.
  *
- * The returned `html` is a page fragment, not a full document — it has no
+ * The returned `html` is a page fragment, not a full document - it has no
  * DOCTYPE, html, head, or body tags. Use this when you need fine-grained
  * control over individual pages.
  *
@@ -118,7 +118,7 @@ export function pdfPageToHtml(path: string, pageIndex: number, options?: PdfConv
 
 /**
  * Get PDF metadata without converting it.
- * Safe to call on DRM-protected PDFs — returns `isDrmProtected: true` without throwing.
+ * Safe to call on DRM-protected PDFs - returns `isDrmProtected: true` without throwing.
  */
 export function pdfInfo(path: string, password?: string): Promise<PdfInfo> {
   return binding.pdfInfo(path, password);
@@ -162,7 +162,7 @@ export async function* pdfToHtmlStream(path: string, options?: PdfStreamOptions)
 
   const window = Math.max(1, concurrency);
 
-  // Sliding window of in-flight promises — gives backpressure-aware prefetch.
+  // Sliding window of in-flight promises - gives backpressure-aware prefetch.
   // At any point there are at most `window` pages being converted concurrently.
   const queue: Promise<PdfPageResult>[] = [];
   let nextFetch = start;
@@ -191,7 +191,7 @@ export async function* pdfToHtmlStream(path: string, options?: PdfStreamOptions)
  * from unbounded parallelism when processing large batches.
  *
  * The underlying `pdfToHtml`/`pdfToHtmlStream` already run on Tokio's blocking
- * thread pool and never block the Node.js event loop — the pool controls
+ * thread pool and never block the Node.js event loop - the pool controls
  * how many are in-flight simultaneously at the JavaScript level.
  *
  * @example
@@ -244,7 +244,7 @@ export class PdfWorkerPool {
   private _release(): void {
     const next = this._queue.shift();
     if (next) {
-      next(); // hand the slot directly — running count stays the same
+      next(); // hand the slot directly - running count stays the same
     } else {
       this._running--;
     }

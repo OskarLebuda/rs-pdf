@@ -201,9 +201,9 @@ fn build_html(pages: Vec<(i32, String)>, total_pages: i32) -> String {
         ".page{display:block;margin:16px auto;box-shadow:0 2px 8px rgba(0,0,0,.4);background:#fff;overflow:hidden;}\n",
         // SVG fills its container
         ".page svg{display:block;}\n",
-        // Text layer: force ALL text transparent — overrides any inline color from MuPDF output
+        // Text layer: force ALL text transparent - overrides any inline color from MuPDF output
         ".tl,.tl *{color:transparent!important;background:transparent!important;}\n",
-        // Text layer paragraphs — MuPDF outputs absolute-positioned <p> elements
+        // Text layer paragraphs - MuPDF outputs absolute-positioned <p> elements
         ".tl p{margin:0;white-space:pre;}\n",
         ".tl span{display:inline-block;}\n",
         "</style>\n</head>\n<body>\n",
@@ -227,8 +227,8 @@ fn build_html(pages: Vec<(i32, String)>, total_pages: i32) -> String {
 /// Convert a PDF file to a self-contained HTML document.
 ///
 /// Each page has two layers:
-/// 1. SVG — pixel-perfect visual rendering (text as vector paths)
-/// 2. Transparent HTML text layer — exact text content from PDF, invisible to users
+/// 1. SVG - pixel-perfect visual rendering (text as vector paths)
+/// 2. Transparent HTML text layer - exact text content from PDF, invisible to users
 ///    but fully readable by search engine crawlers. Users can also copy-paste from it.
 ///
 /// @param path - Path to the PDF file
@@ -303,14 +303,14 @@ pub struct PdfPageResult {
     pub page_index: u32,
     /// Total pages in the document
     pub page_count: u32,
-    /// HTML fragment for this page (not a full document — no DOCTYPE/html/head/body)
+    /// HTML fragment for this page (not a full document - no DOCTYPE/html/head/body)
     pub html: String,
     pub is_drm_protected: bool,
 }
 
 /// Convert a single page of a PDF to an HTML fragment.
 ///
-/// Opens and closes the document on each call — designed for use by `pdfToHtmlStream`
+/// Opens and closes the document on each call - designed for use by `pdfToHtmlStream`
 /// in TypeScript which calls this per page to implement backpressure-aware streaming.
 ///
 /// @param path - Path to the PDF file
@@ -355,7 +355,7 @@ pub async fn pdf_page_to_html(
 }
 
 /// Get PDF metadata without converting it.
-/// Safe to call on DRM-protected PDFs — returns isDrmProtected: true without error.
+/// Safe to call on DRM-protected PDFs - returns isDrmProtected: true without error.
 ///
 /// @param path - Path to the PDF file
 /// @param password - Optional password for DRM-protected PDFs

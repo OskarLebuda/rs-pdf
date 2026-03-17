@@ -221,7 +221,7 @@ describe('PdfWorkerPool', () => {
   it('pool.active and pool.pending reflect in-flight state', async () => {
     const pool = new PdfWorkerPool({ concurrency: 1 });
 
-    // Kick off two converts concurrently — second will queue
+    // Kick off two converts concurrently - second will queue
     const [p1, p2] = [
       pool.convert(SMALL_PDF, { startPage: 0, endPage: 0 }),
       pool.convert(SMALL_PDF, { startPage: 0, endPage: 0 }),

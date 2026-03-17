@@ -1,4 +1,4 @@
-# AGENTS.md — rs-pdf
+# AGENTS.md - rs-pdf
 
 High-performance PDF → HTML converter: MuPDF (C) wrapped via Rust + napi-rs → Node.js native addon.
 
@@ -21,7 +21,7 @@ dist/index.js + dist/index.cjs + dist/index.d.ts
 | Path                | Purpose                                                             |
 | ------------------- | ------------------------------------------------------------------- |
 | `src/lib.rs`        | Rust implementation: `pdfToHtml`, `pdfInfo` exports via napi-rs     |
-| `src/index.ts`      | TypeScript wrapper — loads `.node` binary, re-exports typed API     |
+| `src/index.ts`      | TypeScript wrapper - loads `.node` binary, re-exports typed API     |
 | `src/index.test.ts` | vitest test suite                                                   |
 | `Cargo.toml`        | Rust dependencies: `mupdf`, `napi`, `napi-derive`, `rayon`, `tokio` |
 | `vite.config.ts`    | Unified config: tsdown (pack) + vitest (test) via vite+             |
@@ -44,10 +44,10 @@ Each page produces a dual-layer structure:
 ```html
 <div class="page" id="page-1">
   <div style="position:relative; width:Xpx; height:Ypx; overflow:hidden;">
-    <!-- Layer 1: SVG — pixel-perfect visual rendering (text as vector paths) -->
+    <!-- Layer 1: SVG - pixel-perfect visual rendering (text as vector paths) -->
     <svg ...>...</svg>
 
-    <!-- Layer 2: SEO text layer — transparent overlay, crawlable by search engines -->
+    <!-- Layer 2: SEO text layer - transparent overlay, crawlable by search engines -->
     <!-- color:transparent = invisible to users                                    -->
     <!-- user-select:text  = copy-pasteable by users                              -->
     <!-- pointer-events:none = doesn't block SVG interactions                     -->
@@ -65,7 +65,7 @@ Each page produces a dual-layer structure:
 
 **Why dual-layer:**
 
-- SVG text is rendered as vector paths — zero `<text>` elements → invisible to crawlers
+- SVG text is rendered as vector paths - zero `<text>` elements → invisible to crawlers
 - Text layer contains real DOM text → fully indexed by Google/Bing/etc.
 - `color: transparent` (not `display:none`) → Google indexes it, no cloaking penalties
 
@@ -90,7 +90,7 @@ const info = await pdfInfo('/path/to/file.pdf', password?)
 
 ## Important Constraints
 
-- **Async always**: all operations run on a blocking thread via `tokio::task::spawn_blocking` — never blocks the Node.js event loop.
+- **Async always**: all operations run on a blocking thread via `tokio::task::spawn_blocking` - never blocks the Node.js event loop.
 - **DRM handling**: `pdfInfo` never throws on DRM-protected PDFs (returns `isDrmProtected: true`, `pageCount: 0`). `pdfToHtml` throws unless a valid `password` is supplied.
 - **Page indexing**: all page parameters are **0-based**.
 - **MuPDF is bundled**: `mupdf-sys` compiles libmupdf from C source during `cargo build`. No system MuPDF installation required. First build takes ~1–2 minutes.
