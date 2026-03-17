@@ -1,7 +1,7 @@
 {
   "name": "rs-pdf",
   "version": "0.1.3",
-  "description": "High-performance PDF to HTML converter - MuPDF via Rust/napi-rs, Node.js bindings",
+  "description": "High-performance PDF to HTML converter — MuPDF via Rust/napi-rs, Node.js bindings",
   "license": "MIT",
   "files": [
     "dist"
@@ -41,7 +41,7 @@
     "test": "vp test",
     "check": "vp check",
     "prepublishOnly": "pnpm run build",
-    "release": "bumpp package.json Cargo.toml npm/*/package.json"
+    "release": "bumpp package.json npm/*/package.json --commit --tag --push"
   },
   "devDependencies": {
     "@napi-rs/cli": "3.5.1",
