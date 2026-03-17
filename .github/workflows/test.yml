@@ -38,7 +38,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-      - run: pnpm install --frozen-lockfile --ignore-optional
+      - run: pnpm install --frozen-lockfile --no-optional
 
       - name: Clippy
         run: cargo clippy -- -D warnings
