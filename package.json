@@ -40,11 +40,13 @@
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "release": "bumpp package.json npm/*/package.json --commit --tag --push"
   },
   "devDependencies": {
     "@napi-rs/cli": "3.5.1",
     "@types/node": "25.5.0",
+    "bumpp": "^9",
     "oxfmt": "0.41.0",
     "oxlint": "1.56.0",
     "typescript": "5.9.3",

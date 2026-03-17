@@ -127,11 +127,10 @@ jobs:
           cp dist/rs-pdf.linux-arm64-gnu.node npm/linux-arm64-gnu/
           cp dist/rs-pdf.win32-x64-msvc.node  npm/win32-x64-msvc/
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/rs-pdf.*.node
-          generate_release_notes: true
+      - name: Generate changelog & create GitHub Release
+        run: pnpx changelogithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish platform packages
         run: |
