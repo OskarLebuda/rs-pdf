@@ -1,5 +1,5 @@
 {
-  "name": "rs-pdf-linux-arm64-gnu",
+  "name": "@rs-pdf/linux-arm64-gnu",
   "version": "0.1.12",
   "description": "rs-pdf native binding for Linux ARM64 (glibc)",
   "license": "MIT",

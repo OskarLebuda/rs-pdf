@@ -1,5 +1,5 @@
 {
-  "name": "rs-pdf",
+  "name": "@rs-pdf/core",
   "version": "0.1.12",
   "description": "High-performance PDF to HTML converter — MuPDF via Rust/napi-rs, Node.js bindings",
   "license": "MIT",
@@ -53,11 +53,11 @@
     "vite-plus": "0.1.12"
   },
   "optionalDependencies": {
-    "rs-pdf-darwin-arm64": "0.1.0",
-    "rs-pdf-darwin-x64": "0.1.0",
-    "rs-pdf-linux-arm64-gnu": "0.1.0",
-    "rs-pdf-linux-x64-gnu": "0.1.0",
-    "rs-pdf-win32-x64-msvc": "0.1.0"
+    "@rs-pdf/darwin-arm64": "0.1.0",
+    "@rs-pdf/darwin-x64": "0.1.0",
+    "@rs-pdf/linux-arm64-gnu": "0.1.0",
+    "@rs-pdf/linux-x64-gnu": "0.1.0",
+    "@rs-pdf/win32-x64-msvc": "0.1.0"
   },
   "napi": {
     "binaryName": "rs-pdf",

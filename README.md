@@ -2,7 +2,7 @@
   <img src=".github/assets/logo.png" alt="rs-pdf" width="160" />
 </p>
 
-<h1 align="center">rs-pdf</h1>
+<h1 align="center">@rs-pdf/core</h1>
 
 <p align="center">
   High-performance PDF → HTML converter.<br>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/rs-pdf"><img src="https://img.shields.io/npm/v/rs-pdf?style=flat-square" alt="npm" /></a>
+  <a href="https://www.npmjs.com/package/@rs-pdf/core"><img src="https://img.shields.io/npm/v/%40rs-pdf%2Fcore?style=flat-square" alt="npm" /></a>
   <a href="https://github.com/olebuda/rs-pdf/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/olebuda/rs-pdf/test.yml?label=tests&style=flat-square" alt="tests" /></a>
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT" />
 </p>
@@ -28,9 +28,9 @@
 ## Installation
 
 ```sh
-npm install rs-pdf
+npm install @rs-pdf/core
 # or
-pnpm add rs-pdf
+pnpm add @rs-pdf/core
 ```
 
 The correct native binary for your platform is installed automatically via `optionalDependencies`.
@@ -42,7 +42,7 @@ The correct native binary for your platform is installed automatically via `opti
 ### Convert entire PDF
 
 ```ts
-import { pdfToHtml } from 'rs-pdf';
+import { pdfToHtml } from '@rs-pdf/core';
 
 const result = await pdfToHtml('/path/to/file.pdf');
 
@@ -87,7 +87,7 @@ Yields pages as they are converted - useful for large PDFs or when you want
 to process/save pages without waiting for the entire document.
 
 ```ts
-import { pdfToHtmlStream } from 'rs-pdf';
+import { pdfToHtmlStream } from '@rs-pdf/core';
 
 for await (const page of pdfToHtmlStream('/large.pdf')) {
   console.log(`Page ${page.pageIndex + 1}/${page.pageCount}`);
@@ -106,7 +106,7 @@ for await (const page of pdfToHtmlStream('/large.pdf', { concurrency: 4 })) {
 ### Single page
 
 ```ts
-import { pdfPageToHtml } from 'rs-pdf';
+import { pdfPageToHtml } from '@rs-pdf/core';
 
 const page = await pdfPageToHtml('/path/to/file.pdf', 3); // page index 3 (4th page)
 // page.html is a fragment - no DOCTYPE/html/head/body
@@ -115,7 +115,7 @@ const page = await pdfPageToHtml('/path/to/file.pdf', 3); // page index 3 (4th p
 ### Metadata only
 
 ```ts
-import { pdfInfo } from 'rs-pdf';
+import { pdfInfo } from '@rs-pdf/core';
 
 const info = await pdfInfo('/path/to/file.pdf');
 // { pageCount, isDrmProtected, title, author, subject, creator }
@@ -126,7 +126,7 @@ const info = await pdfInfo('/path/to/file.pdf');
 Limit concurrent PDF conversions when processing large batches:
 
 ```ts
-import { PdfWorkerPool } from 'rs-pdf';
+import { PdfWorkerPool } from '@rs-pdf/core';
 
 const pool = new PdfWorkerPool({ concurrency: 4 });
 

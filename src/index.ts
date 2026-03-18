@@ -35,11 +35,11 @@ const PLATFORM_FILENAMES: Record<string, string> = {
 
 // Optional-dependency package names (used when installed via npm)
 const PLATFORM_PACKAGES: Record<string, string> = {
-  'darwin arm64': 'rs-pdf-darwin-arm64',
-  'darwin x64': 'rs-pdf-darwin-x64',
-  'linux x64': 'rs-pdf-linux-x64-gnu',
-  'linux arm64': 'rs-pdf-linux-arm64-gnu',
-  'win32 x64': 'rs-pdf-win32-x64-msvc',
+  'darwin arm64': '@rs-pdf/darwin-arm64',
+  'darwin x64': '@rs-pdf/darwin-x64',
+  'linux x64': '@rs-pdf/linux-x64-gnu',
+  'linux arm64': '@rs-pdf/linux-arm64-gnu',
+  'win32 x64': '@rs-pdf/win32-x64-msvc',
 };
 
 interface NativeBinding {
@@ -53,7 +53,7 @@ function loadBinding(): NativeBinding {
   const filename = PLATFORM_FILENAMES[key];
   const pkg = PLATFORM_PACKAGES[key];
 
-  if (!filename) throw new Error(`rs-pdf: unsupported platform "${key}"`);
+  if (!filename) throw new Error(`@rs-pdf/core: unsupported platform "${key}"`);
 
   const candidates: string[] = [];
 
@@ -78,7 +78,7 @@ function loadBinding(): NativeBinding {
   }
 
   throw new Error(
-    `rs-pdf: could not find native binding "${filename}".\n` +
+    `@rs-pdf/core: could not find native binding "${filename}".\n` +
       `  Tried: ${candidates.join(', ')}\n` +
       `  Run \`pnpm build:native\` to compile it.`,
   );
