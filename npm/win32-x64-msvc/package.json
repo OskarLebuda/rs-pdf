@@ -1,6 +1,6 @@
 {
   "name": "rs-pdf-win32-x64-msvc",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "rs-pdf native binding for Windows x64 (MSVC)",
   "license": "MIT",
   "files": [
