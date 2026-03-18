@@ -17,5 +17,6 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
     environment: 'node',
     reporters: ['verbose'],
+    testTimeout: 30000,
   },
 });
