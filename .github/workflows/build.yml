@@ -11,6 +11,7 @@ jobs:
   build:
     name: Build · ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
+    container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +23,8 @@ jobs:
             runner: macos-latest
 
           - target: x86_64-unknown-linux-gnu
-            runner: ubuntu-20.04
+            runner: ubuntu-latest
+            container: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
 
           - target: aarch64-unknown-linux-gnu
             runner: ubuntu-24.04-arm
@@ -41,6 +43,7 @@ jobs:
           cache: pnpm
 
       - uses: dtolnay/rust-toolchain@stable
+        if: ${{ !matrix.container }}
         with:
           targets: ${{ matrix.target }}
 
@@ -54,9 +57,13 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-${{ matrix.target }}-cargo-
 
-      - name: Install fontconfig (Linux only)
-        if: runner.os == 'Linux'
+      - name: Install fontconfig (Linux host runner)
+        if: runner.os == 'Linux' && !matrix.container
         run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev
+
+      - name: Install fontconfig (Linux container)
+        if: matrix.container
+        run: apt-get update && apt-get install -y libfontconfig1-dev
 
       - run: pnpm install --no-frozen-lockfile
 
@@ -75,7 +82,7 @@ jobs:
   publish:
     name: Publish
     needs: build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write # create GitHub Release
       id-token: write # npm provenance (OIDC)
