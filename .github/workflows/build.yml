@@ -120,7 +120,7 @@ jobs:
       - name: Publish platform packages
         run: |
           for pkg in npm/*/; do
-            pnpm publish "$pkg" --provenance --access public --no-git-checks
+            pnpm publish "$pkg" --provenance --access public --no-git-checks || echo "::warning::Failed to publish $pkg (continuing)"
           done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
