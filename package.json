@@ -1,6 +1,6 @@
 {
   "name": "@rs-pdf/core",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "High-performance PDF to HTML converter — MuPDF via Rust/napi-rs, Node.js bindings",
   "license": "MIT",
   "files": [
