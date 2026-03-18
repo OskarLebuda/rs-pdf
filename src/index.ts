@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
-import { cpus } from 'node:os';
+import { cpus, tmpdir } from 'node:os';
+import { writeFile, unlink } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -13,6 +14,11 @@ export type {
   PdfInfo,
   PdfStreamOptions,
   PdfWorkerPoolOptions,
+  PdfSource,
+  PdfInfoInput,
+  PdfToHtmlInput,
+  PdfPageToHtmlInput,
+  PdfStreamInput,
 } from './types.js';
 import type {
   PdfConvertOptions,
@@ -21,6 +27,11 @@ import type {
   PdfInfo,
   PdfStreamOptions,
   PdfWorkerPoolOptions,
+  PdfSource,
+  PdfInfoInput,
+  PdfToHtmlInput,
+  PdfPageToHtmlInput,
+  PdfStreamInput,
 } from './types.js';
 
 // ─── Native binding loader ────────────────────────────────────────────────────
@@ -33,7 +44,6 @@ const PLATFORM_FILENAMES: Record<string, string> = {
   'win32 x64': 'rs-pdf.win32-x64-msvc.node',
 };
 
-// Optional-dependency package names (used when installed via npm)
 const PLATFORM_PACKAGES: Record<string, string> = {
   'darwin arm64': '@rs-pdf/darwin-arm64',
   'darwin x64': '@rs-pdf/darwin-x64',
@@ -57,7 +67,6 @@ function loadBinding(): NativeBinding {
 
   const candidates: string[] = [];
 
-  // 1. Installed as optionalDependency (npm publish scenario)
   if (pkg) {
     try {
       candidates.push(_require.resolve(`${pkg}/${filename}`));
@@ -66,7 +75,6 @@ function loadBinding(): NativeBinding {
     }
   }
 
-  // 2. Local dist/ (same dir as this compiled file, or ../dist from src/)
   candidates.push(join(__dirname, filename), join(__dirname, '..', 'dist', filename));
 
   for (const candidate of candidates) {
@@ -86,42 +94,83 @@ function loadBinding(): NativeBinding {
 
 const binding = loadBinding();
 
+// ─── URL download helper ──────────────────────────────────────────────────────
+
+async function resolveSource(src: PdfSource): Promise<{ path: string; cleanup: () => Promise<void> }> {
+  if (src.url !== undefined) {
+    const res = await fetch(src.url);
+    if (!res.ok) {
+      throw new Error(`@rs-pdf/core: failed to fetch "${src.url}": ${res.status} ${res.statusText}`);
+    }
+    const buffer = await res.arrayBuffer();
+    const tmpPath = join(tmpdir(), `rs-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`);
+    await writeFile(tmpPath, Buffer.from(buffer));
+    return { path: tmpPath, cleanup: () => unlink(tmpPath).catch(() => {}) };
+  }
+  return { path: src.path, cleanup: () => Promise.resolve() };
+}
+
 // ─── Core API ─────────────────────────────────────────────────────────────────
 
 /**
- * Convert a PDF file to a self-contained HTML document.
+ * Convert a PDF to a self-contained HTML document.
  *
+ * Accepts either a local file `path` or a remote `url`.
  * All pages are converted before the promise resolves. For large PDFs or when
  * you want to process pages as they arrive, use {@link pdfToHtmlStream} instead.
  *
  * @example
- * const result = await pdfToHtml('/path/to/file.pdf')
- * const result = await pdfToHtml('/path/to/file.pdf', { startPage: 0, endPage: 9 })
- * const result = await pdfToHtml('/path/to/protected.pdf', { password: 'secret' })
+ * const result = await pdfToHtml({ path: '/path/to/file.pdf' })
+ * const result = await pdfToHtml({ url: 'https://example.com/doc.pdf', dpi: 200 })
+ * const result = await pdfToHtml({ path: '/protected.pdf', password: 'secret' })
  */
-export function pdfToHtml(path: string, options?: PdfConvertOptions): Promise<PdfConvertResult> {
-  return binding.pdfToHtml(path, options);
+export async function pdfToHtml(input: PdfToHtmlInput): Promise<PdfConvertResult> {
+  const { path: _p, url: _u, ...options } = input as any;
+  const { path, cleanup } = await resolveSource(input);
+  try {
+    return await binding.pdfToHtml(path, options);
+  } finally {
+    await cleanup();
+  }
 }
 
 /**
  * Convert a single page of a PDF to an HTML fragment.
  *
- * The returned `html` is a page fragment, not a full document - it has no
- * DOCTYPE, html, head, or body tags. Use this when you need fine-grained
- * control over individual pages.
+ * The returned `html` is a page fragment — no DOCTYPE, html, head, or body tags.
+ * Accepts either a local file `path` or a remote `url`.
  *
- * @param pageIndex - 0-based page index
+ * @example
+ * const page = await pdfPageToHtml({ path: '/file.pdf', pageIndex: 3 })
+ * const page = await pdfPageToHtml({ url: 'https://example.com/doc.pdf', pageIndex: 0 })
  */
-export function pdfPageToHtml(path: string, pageIndex: number, options?: PdfConvertOptions): Promise<PdfPageResult> {
-  return binding.pdfPageToHtml(path, pageIndex, options);
+export async function pdfPageToHtml(input: PdfPageToHtmlInput): Promise<PdfPageResult> {
+  const { path: _p, url: _u, pageIndex, ...options } = input as any;
+  const { path, cleanup } = await resolveSource(input);
+  try {
+    return await binding.pdfPageToHtml(path, pageIndex, options);
+  } finally {
+    await cleanup();
+  }
 }
 
 /**
  * Get PDF metadata without converting it.
- * Safe to call on DRM-protected PDFs - returns `isDrmProtected: true` without throwing.
+ * Safe to call on DRM-protected PDFs — returns `isDrmProtected: true` without throwing.
+ * Accepts either a local file `path` or a remote `url`.
+ *
+ * @example
+ * const info = await pdfInfo({ path: '/file.pdf' })
+ * const info = await pdfInfo({ url: 'https://example.com/doc.pdf' })
  */
-export function pdfInfo(path: string, password?: string): Promise<PdfInfo> {
-  return binding.pdfInfo(path, password);
+export async function pdfInfo(input: PdfInfoInput): Promise<PdfInfo> {
+  const { password } = input;
+  const { path, cleanup } = await resolveSource(input);
+  try {
+    return await binding.pdfInfo(path, password);
+  } finally {
+    await cleanup();
+  }
 }
 
 // ─── Streaming API ────────────────────────────────────────────────────────────
@@ -129,56 +178,50 @@ export function pdfInfo(path: string, password?: string): Promise<PdfInfo> {
 /**
  * Convert a PDF to HTML page-by-page as an async generator.
  *
+ * Accepts either a local file `path` or a remote `url`.
  * Each yielded value is a {@link PdfPageResult} containing the HTML fragment
  * for that page. Pages are yielded in order, starting from `startPage`.
  *
- * Use the `concurrency` option to prefetch multiple pages in parallel,
- * reducing total wall-clock time for large PDFs at the cost of buffering
- * more pages in memory simultaneously.
- *
  * @example
- * // Process pages one at a time as they arrive
- * for await (const page of pdfToHtmlStream('/large.pdf')) {
- *   console.log(`Page ${page.pageIndex + 1}/${page.pageCount}: ${page.html.length} bytes`)
- *   await saveToDatabase(page)
+ * for await (const page of pdfToHtmlStream({ path: '/large.pdf' })) {
+ *   console.log(`Page ${page.pageIndex + 1}/${page.pageCount}`)
  * }
  *
  * @example
- * // Prefetch up to 4 pages at a time
- * for await (const page of pdfToHtmlStream('/large.pdf', { concurrency: 4 })) {
+ * for await (const page of pdfToHtmlStream({ url: 'https://example.com/doc.pdf', concurrency: 4 })) {
  *   process(page)
  * }
  */
-export async function* pdfToHtmlStream(path: string, options?: PdfStreamOptions): AsyncGenerator<PdfPageResult> {
-  const { concurrency = 1, startPage, endPage, ...pageOpts } = options ?? {};
+export async function* pdfToHtmlStream(input: PdfStreamInput): AsyncGenerator<PdfPageResult> {
+  const { concurrency = 1, startPage, endPage, ...pageOpts } = input as PdfStreamOptions;
+  const { path, cleanup } = await resolveSource(input);
 
-  const info = await binding.pdfInfo(path, pageOpts.password);
-  const start = startPage ?? 0;
-  const end = Math.min(endPage ?? info.pageCount - 1, info.pageCount - 1);
+  try {
+    const info = await binding.pdfInfo(path, pageOpts.password);
+    const start = startPage ?? 0;
+    const end = Math.min(endPage ?? info.pageCount - 1, info.pageCount - 1);
 
-  if (start > end) {
-    throw new Error(`Invalid page range: startPage (${start}) > endPage (${end})`);
-  }
+    if (start > end) {
+      throw new Error(`Invalid page range: startPage (${start}) > endPage (${end})`);
+    }
 
-  const window = Math.max(1, concurrency);
+    const window = Math.max(1, concurrency);
+    const queue: Promise<PdfPageResult>[] = [];
+    let nextFetch = start;
 
-  // Sliding window of in-flight promises - gives backpressure-aware prefetch.
-  // At any point there are at most `window` pages being converted concurrently.
-  const queue: Promise<PdfPageResult>[] = [];
-  let nextFetch = start;
-
-  // Prime the window
-  while (queue.length < window && nextFetch <= end) {
-    queue.push(binding.pdfPageToHtml(path, nextFetch++, pageOpts));
-  }
-
-  while (queue.length > 0) {
-    const result = await queue.shift()!;
-    // Immediately kick off the next page while the caller processes the current one
-    if (nextFetch <= end) {
+    while (queue.length < window && nextFetch <= end) {
       queue.push(binding.pdfPageToHtml(path, nextFetch++, pageOpts));
     }
-    yield result;
+
+    while (queue.length > 0) {
+      const result = await queue.shift()!;
+      if (nextFetch <= end) {
+        queue.push(binding.pdfPageToHtml(path, nextFetch++, pageOpts));
+      }
+      yield result;
+    }
+  } finally {
+    await cleanup();
   }
 }
 
@@ -190,20 +233,14 @@ export async function* pdfToHtmlStream(path: string, options?: PdfStreamOptions)
  * Limits how many PDFs are being actively converted at once, preventing OOM
  * from unbounded parallelism when processing large batches.
  *
- * The underlying `pdfToHtml`/`pdfToHtmlStream` already run on Tokio's blocking
- * thread pool and never block the Node.js event loop - the pool controls
- * how many are in-flight simultaneously at the JavaScript level.
- *
  * @example
  * const pool = new PdfWorkerPool({ concurrency: 4 })
  *
- * // Batch convert
  * const results = await Promise.all(
- *   pdfPaths.map(p => pool.convert(p))
+ *   pdfPaths.map(p => pool.convert({ path: p }))
  * )
  *
- * // Stream from pool
- * for await (const page of pool.stream('/large.pdf')) {
+ * for await (const page of pool.stream({ url: 'https://example.com/doc.pdf' })) {
  *   process(page)
  * }
  *
@@ -244,7 +281,7 @@ export class PdfWorkerPool {
   private _release(): void {
     const next = this._queue.shift();
     if (next) {
-      next(); // hand the slot directly - running count stays the same
+      next();
     } else {
       this._running--;
     }
@@ -254,10 +291,10 @@ export class PdfWorkerPool {
    * Convert a PDF, waiting for a pool slot if all are busy.
    * Equivalent to `pdfToHtml` but concurrency-limited.
    */
-  async convert(path: string, options?: PdfConvertOptions): Promise<PdfConvertResult> {
+  async convert(input: PdfToHtmlInput): Promise<PdfConvertResult> {
     await this._acquire();
     try {
-      return await binding.pdfToHtml(path, options);
+      return await pdfToHtml(input);
     } finally {
       this._release();
     }
@@ -267,10 +304,10 @@ export class PdfWorkerPool {
    * Stream a PDF page-by-page, holding a pool slot for the entire duration.
    * Equivalent to `pdfToHtmlStream` but concurrency-limited.
    */
-  async *stream(path: string, options?: PdfStreamOptions): AsyncGenerator<PdfPageResult> {
+  async *stream(input: PdfStreamInput): AsyncGenerator<PdfPageResult> {
     await this._acquire();
     try {
-      yield* pdfToHtmlStream(path, options);
+      yield* pdfToHtmlStream(input);
     } finally {
       this._release();
     }

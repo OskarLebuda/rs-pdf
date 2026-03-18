@@ -39,12 +39,19 @@ The correct native binary for your platform is installed automatically via `opti
 
 ## Usage
 
+All functions accept a single input object with either `path` (local file) or `url` (remote file).
+When `url` is given, the PDF is downloaded to a temporary location and cleaned up automatically.
+
 ### Convert entire PDF
 
 ```ts
 import { pdfToHtml } from '@rs-pdf/core';
 
-const result = await pdfToHtml('/path/to/file.pdf');
+// from local file
+const result = await pdfToHtml({ path: '/path/to/file.pdf' });
+
+// from URL
+const result = await pdfToHtml({ url: 'https://example.com/document.pdf' });
 
 console.log(result.pageCount); // total pages
 console.log(result.pagesConverted); // pages actually converted
@@ -54,10 +61,11 @@ console.log(result.html); // self-contained HTML document
 ### Page range & DPI
 
 ```ts
-const result = await pdfToHtml('/path/to/file.pdf', {
+const result = await pdfToHtml({
+  path: '/path/to/file.pdf',
   startPage: 0, // 0-based, default: 0
-  endPage: 9, // 0-based inclusive, default: last page
-  dpi: 200, // render quality, default: 150
+  endPage: 9,   // 0-based inclusive, default: last page
+  dpi: 200,     // render quality, default: 150
 });
 ```
 
@@ -67,18 +75,14 @@ Adds a transparent HTML text overlay on top of the SVG - invisible to users,
 but indexed by search engine crawlers and copy-pasteable.
 
 ```ts
-const result = await pdfToHtml('/path/to/file.pdf', {
-  seoTextLayer: true,
-});
+const result = await pdfToHtml({ path: '/path/to/file.pdf', seoTextLayer: true });
 // result.html contains: SVG visual layer + <div class="tl"> text overlay
 ```
 
 ### DRM-protected PDFs
 
 ```ts
-const result = await pdfToHtml('/path/to/protected.pdf', {
-  password: 'secret',
-});
+const result = await pdfToHtml({ path: '/path/to/protected.pdf', password: 'secret' });
 ```
 
 ### Stream page by page
@@ -89,7 +93,7 @@ to process/save pages without waiting for the entire document.
 ```ts
 import { pdfToHtmlStream } from '@rs-pdf/core';
 
-for await (const page of pdfToHtmlStream('/large.pdf')) {
+for await (const page of pdfToHtmlStream({ path: '/large.pdf' })) {
   console.log(`Page ${page.pageIndex + 1}/${page.pageCount}`);
   await saveToDatabase(page.html);
 }
@@ -98,7 +102,7 @@ for await (const page of pdfToHtmlStream('/large.pdf')) {
 Use `concurrency` to prefetch multiple pages in parallel:
 
 ```ts
-for await (const page of pdfToHtmlStream('/large.pdf', { concurrency: 4 })) {
+for await (const page of pdfToHtmlStream({ url: 'https://example.com/doc.pdf', concurrency: 4 })) {
   process(page);
 }
 ```
@@ -108,7 +112,7 @@ for await (const page of pdfToHtmlStream('/large.pdf', { concurrency: 4 })) {
 ```ts
 import { pdfPageToHtml } from '@rs-pdf/core';
 
-const page = await pdfPageToHtml('/path/to/file.pdf', 3); // page index 3 (4th page)
+const page = await pdfPageToHtml({ path: '/path/to/file.pdf', pageIndex: 3 });
 // page.html is a fragment - no DOCTYPE/html/head/body
 ```
 
@@ -117,7 +121,8 @@ const page = await pdfPageToHtml('/path/to/file.pdf', 3); // page index 3 (4th p
 ```ts
 import { pdfInfo } from '@rs-pdf/core';
 
-const info = await pdfInfo('/path/to/file.pdf');
+const info = await pdfInfo({ path: '/path/to/file.pdf' });
+// or: await pdfInfo({ url: 'https://example.com/doc.pdf' })
 // { pageCount, isDrmProtected, title, author, subject, creator }
 ```
 
@@ -130,10 +135,12 @@ import { PdfWorkerPool } from '@rs-pdf/core';
 
 const pool = new PdfWorkerPool({ concurrency: 4 });
 
-const results = await Promise.all(pdfPaths.map((p) => pool.convert(p, { dpi: 150 })));
+const results = await Promise.all(
+  pdfPaths.map((p) => pool.convert({ path: p, dpi: 150 }))
+);
 
 // stream via pool
-for await (const page of pool.stream('/large.pdf')) {
+for await (const page of pool.stream({ url: 'https://example.com/large.pdf' })) {
   process(page);
 }
 
@@ -142,19 +149,21 @@ pool.destroy();
 
 ## API
 
-### `pdfToHtml(path, options?): Promise<PdfConvertResult>`
+All functions accept a single input object. Provide either `path` or `url` — not both.
+
+### `pdfToHtml(input): Promise<PdfConvertResult>`
 
 Converts all (or a range of) pages to a self-contained HTML document.
 
-### `pdfPageToHtml(path, pageIndex, options?): Promise<PdfPageResult>`
+### `pdfPageToHtml(input): Promise<PdfPageResult>`
 
 Converts a single page to an HTML fragment (no DOCTYPE/html/head/body).
 
-### `pdfToHtmlStream(path, options?): AsyncGenerator<PdfPageResult>`
+### `pdfToHtmlStream(input): AsyncGenerator<PdfPageResult>`
 
 Yields pages one by one as they are converted.
 
-### `pdfInfo(path, password?): Promise<PdfInfo>`
+### `pdfInfo(input): Promise<PdfInfo>`
 
 Returns document metadata without rendering. Safe to call on DRM-protected PDFs.
 
@@ -162,16 +171,19 @@ Returns document metadata without rendering. Safe to call on DRM-protected PDFs.
 
 Concurrency-limited pool. See [Worker pool](#worker-pool) above.
 
-### Options
+### Input fields
 
-| Option         | Type      | Default   | Description                                 |
-| -------------- | --------- | --------- | ------------------------------------------- |
-| `startPage`    | `number`  | `0`       | First page to convert (0-based)             |
-| `endPage`      | `number`  | last page | Last page to convert (0-based, inclusive)   |
-| `password`     | `string`  | -         | Password for DRM-protected PDFs             |
-| `dpi`          | `number`  | `150`     | Render quality (higher = larger output)     |
-| `seoTextLayer` | `boolean` | `false`   | Add transparent HTML text overlay for SEO   |
-| `concurrency`  | `number`  | `1`       | Pages to prefetch in parallel (stream only) |
+| Field          | Type      | Default   | Applies to          | Description                                 |
+| -------------- | --------- | --------- | ------------------- | ------------------------------------------- |
+| `path`         | `string`  | -         | all                 | Local file path (mutually exclusive with `url`) |
+| `url`          | `string`  | -         | all                 | Remote URL — downloaded automatically       |
+| `pageIndex`    | `number`  | -         | `pdfPageToHtml`     | 0-based page index (required)               |
+| `startPage`    | `number`  | `0`       | all except `pdfInfo`| First page to convert (0-based)             |
+| `endPage`      | `number`  | last page | all except `pdfInfo`| Last page to convert (0-based, inclusive)   |
+| `password`     | `string`  | -         | all                 | Password for DRM-protected PDFs             |
+| `dpi`          | `number`  | `150`     | all except `pdfInfo`| Render quality (higher = larger output)     |
+| `seoTextLayer` | `boolean` | `false`   | all except `pdfInfo`| Add transparent HTML text overlay for SEO   |
+| `concurrency`  | `number`  | `1`       | `pdfToHtmlStream`   | Pages to prefetch in parallel               |
 
 ## HTML output structure
 

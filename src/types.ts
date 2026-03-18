@@ -61,3 +61,26 @@ export interface PdfWorkerPoolOptions {
    */
   concurrency?: number;
 }
+
+// ─── Input types ─────────────────────────────────────────────────────────────
+
+/**
+ * PDF source — provide either a local file `path` or a remote `url`, not both.
+ * When `url` is given the file is downloaded to a temporary location and
+ * cleaned up automatically after the operation completes.
+ */
+export type PdfSource =
+  | { path: string; url?: never }
+  | { url: string; path?: never };
+
+/** Input for {@link pdfInfo} */
+export type PdfInfoInput = PdfSource & { password?: string };
+
+/** Input for {@link pdfToHtml} */
+export type PdfToHtmlInput = PdfSource & PdfConvertOptions;
+
+/** Input for {@link pdfPageToHtml} */
+export type PdfPageToHtmlInput = PdfSource & { pageIndex: number } & PdfConvertOptions;
+
+/** Input for {@link pdfToHtmlStream} */
+export type PdfStreamInput = PdfSource & PdfStreamOptions;
