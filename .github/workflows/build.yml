@@ -122,6 +122,10 @@ jobs:
           for pkg in npm/*/; do
             pnpm publish "$pkg" --provenance --access public --no-git-checks
           done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish main package
         run: pnpm publish --provenance --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
