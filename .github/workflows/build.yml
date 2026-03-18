@@ -11,7 +11,6 @@ jobs:
   build:
     name: Build · ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
-    container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
@@ -23,8 +22,7 @@ jobs:
             runner: macos-latest
 
           - target: x86_64-unknown-linux-gnu
-            runner: ubuntu-latest
-            container: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
+            runner: ubuntu-22.04
 
           - target: aarch64-unknown-linux-gnu
             runner: ubuntu-24.04-arm
@@ -43,13 +41,8 @@ jobs:
           cache: pnpm
 
       - uses: dtolnay/rust-toolchain@stable
-        if: ${{ !matrix.container }}
         with:
           targets: ${{ matrix.target }}
-
-      - name: Update Rust in container
-        if: ${{ matrix.container }}
-        run: rustup update stable && rustup default stable
 
       - uses: actions/cache@v4
         with:
@@ -61,13 +54,9 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-${{ matrix.target }}-cargo-
 
-      - name: Install fontconfig (Linux host runner)
-        if: runner.os == 'Linux' && !matrix.container
+      - name: Install fontconfig (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev
-
-      - name: Install fontconfig (Linux container)
-        if: matrix.container
-        run: apt-get update && apt-get install -y libfontconfig1-dev
 
       - run: pnpm install --no-frozen-lockfile
 
@@ -75,11 +64,6 @@ jobs:
         run: pnpm exec napi build --platform --release --output-dir dist --target ${{ matrix.target }}
         env:
           MACOSX_DEPLOYMENT_TARGET: '10.15'
-          # The napi-rs debian container sets CC_x86_64_unknown_linux_gnu=clang with
-          # a baked-in cross-compilation sysroot that breaks mupdf-sys C headers.
-          # Override to native gcc (no sysroot) — only takes effect inside the container.
-          CC_x86_64_unknown_linux_gnu: gcc
-          CXX_x86_64_unknown_linux_gnu: g++
 
       - uses: actions/upload-artifact@v4
         with:
