@@ -1,6 +1,6 @@
 {
   "name": "rs-pdf-darwin-arm64",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "rs-pdf native binding for macOS Apple Silicon (arm64)",
   "license": "MIT",
   "files": [
