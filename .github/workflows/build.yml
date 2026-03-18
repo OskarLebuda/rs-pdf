@@ -58,7 +58,7 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev
 
-      - run: pnpm install --no-frozen-lockfile --no-optional
+      - run: pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm exec napi build --platform --release --output-dir dist --target ${{ matrix.target }}
@@ -91,7 +91,7 @@ jobs:
           cache: pnpm
           registry-url: 'https://registry.npmjs.org'
 
-      - run: pnpm install --no-frozen-lockfile --no-optional
+      - run: pnpm install --no-frozen-lockfile
 
       - uses: actions/download-artifact@v4
         with:
