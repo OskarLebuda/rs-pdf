@@ -67,6 +67,10 @@ function loadBinding(): NativeBinding {
 
   const candidates: string[] = [];
 
+  // 1. Local dist/ — primary path when .node is bundled inside @rs-pdf/core
+  candidates.push(join(__dirname, filename));
+
+  // 2. Installed as optionalDependency — fallback for environments that install platform packages
   if (pkg) {
     try {
       candidates.push(_require.resolve(`${pkg}/${filename}`));
@@ -74,8 +78,6 @@ function loadBinding(): NativeBinding {
       /* not installed */
     }
   }
-
-  candidates.push(join(__dirname, filename), join(__dirname, '..', 'dist', filename));
 
   for (const candidate of candidates) {
     try {
