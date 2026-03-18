@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import { cpus, tmpdir } from 'node:os';
-import { writeFile, unlink } from 'node:fs/promises';
+import { writeFile, unlink, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -127,10 +127,16 @@ async function resolveSource(src: PdfSource): Promise<{ path: string; cleanup: (
  * const result = await pdfToHtml({ path: '/protected.pdf', password: 'secret' })
  */
 export async function pdfToHtml(input: PdfToHtmlInput): Promise<PdfConvertResult> {
-  const { path: _p, url: _u, ...options } = input as any;
+  const { path: _p, url: _u, outputPath, ...options } = input as any;
   const { path, cleanup } = await resolveSource(input);
   try {
-    return await binding.pdfToHtml(path, options);
+    const result = await binding.pdfToHtml(path, options);
+    if (outputPath) {
+      await mkdir(dirname(outputPath), { recursive: true });
+      await writeFile(outputPath, result.html, 'utf8');
+      return { ...result, html: '' };
+    }
+    return result;
   } finally {
     await cleanup();
   }

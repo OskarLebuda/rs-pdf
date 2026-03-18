@@ -77,7 +77,14 @@ export type PdfSource =
 export type PdfInfoInput = PdfSource & { password?: string };
 
 /** Input for {@link pdfToHtml} */
-export type PdfToHtmlInput = PdfSource & PdfConvertOptions;
+export type PdfToHtmlInput = PdfSource & PdfConvertOptions & {
+  /**
+   * Write the HTML output directly to this file path.
+   * When set, `result.html` is an empty string — the content goes to disk only.
+   * Parent directories are created automatically.
+   */
+  outputPath?: string;
+};
 
 /** Input for {@link pdfPageToHtml} */
 export type PdfPageToHtmlInput = PdfSource & { pageIndex: number } & PdfConvertOptions;

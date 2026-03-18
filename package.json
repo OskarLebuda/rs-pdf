@@ -14,6 +14,9 @@
       "default": "./dist/index.mjs"
     }
   },
+  "bin": {
+    "rs-pdf": "./dist/cli.mjs"
+  },
   "keywords": [
     "pdf",
     "html",
@@ -40,7 +43,7 @@
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check",
-    "prepublishOnly": "pnpm run build",
+    "prepublishOnly": "pnpm run build:ts",
     "release": "bumpp package.json npm/*/package.json --commit --tag --push"
   },
   "devDependencies": {
