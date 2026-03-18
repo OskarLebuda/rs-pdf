@@ -75,10 +75,11 @@ jobs:
         run: pnpm exec napi build --platform --release --output-dir dist --target ${{ matrix.target }}
         env:
           MACOSX_DEPLOYMENT_TARGET: '10.15'
-          # Clear sysroot flags set by the napi-rs debian container — they conflict
-          # with mupdf-sys C++ headers (isinf/isnan declaration conflict).
-          CFLAGS: ''
-          CXXFLAGS: ''
+          # The napi-rs debian container sets CC_x86_64_unknown_linux_gnu=clang with
+          # a baked-in cross-compilation sysroot that breaks mupdf-sys C headers.
+          # Override to native gcc (no sysroot) — only takes effect inside the container.
+          CC_x86_64_unknown_linux_gnu: gcc
+          CXX_x86_64_unknown_linux_gnu: g++
 
       - uses: actions/upload-artifact@v4
         with:
