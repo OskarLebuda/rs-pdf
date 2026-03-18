@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@rs-pdf/core"><img src="https://img.shields.io/npm/v/%40rs-pdf%2Fcore?style=flat-square" alt="npm" /></a>
-  <a href="https://github.com/olebuda/rs-pdf/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/olebuda/rs-pdf/test.yml?label=tests&style=flat-square" alt="tests" /></a>
+  <a href="https://github.com/OskarLebuda/rs-pdf/actions/workflows/test.yml"><img src="https://img.shields.io/github/actions/workflow/status/OskarLebuda/rs-pdf/test.yml?label=tests&style=flat-square" alt="tests" /></a>
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT" />
 </p>
 
