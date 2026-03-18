@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { pdfToHtml, pdfToHtmlStream, pdfPageToHtml, pdfInfo, PdfWorkerPool } from '../src/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SAMPLE_PDF = join(__dirname, 'sample-2.pdf');
+const SAMPLE_PDF = join(__dirname, 'sample.pdf');
 const SMALL_PDF = join(__dirname, 'sample.pdf');
 
 // ─── pdfInfo ──────────────────────────────────────────────────────────────────
