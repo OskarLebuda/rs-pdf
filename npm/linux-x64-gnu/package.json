@@ -12,5 +12,10 @@
   "cpu": [
     "x64"
   ],
-  "main": "rs-pdf.linux-x64-gnu.node"
+  "main": "rs-pdf.linux-x64-gnu.node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OskarLebuda/rs-pdf",
+    "directory": "npm/linux-x64-gnu"
+  }
 }

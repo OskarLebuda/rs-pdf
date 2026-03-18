@@ -12,5 +12,10 @@
   "cpu": [
     "x64"
   ],
-  "main": "rs-pdf.win32-x64-msvc.node"
+  "main": "rs-pdf.win32-x64-msvc.node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OskarLebuda/rs-pdf",
+    "directory": "npm/win32-x64-msvc"
+  }
 }
