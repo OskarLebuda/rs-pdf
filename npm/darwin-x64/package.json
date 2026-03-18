@@ -1,6 +1,6 @@
 {
   "name": "@rs-pdf/darwin-x64",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "rs-pdf native binding for macOS Intel (x64)",
   "license": "MIT",
   "files": [
