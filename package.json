@@ -53,11 +53,11 @@
     "vite-plus": "0.1.12"
   },
   "optionalDependencies": {
-    "@rs-pdf/darwin-arm64": "0.1.0",
-    "@rs-pdf/darwin-x64": "0.1.0",
-    "@rs-pdf/linux-arm64-gnu": "0.1.0",
-    "@rs-pdf/linux-x64-gnu": "0.1.0",
-    "@rs-pdf/win32-x64-msvc": "0.1.0"
+    "@rs-pdf/darwin-arm64": "*",
+    "@rs-pdf/darwin-x64": "*",
+    "@rs-pdf/linux-arm64-gnu": "*",
+    "@rs-pdf/linux-x64-gnu": "*",
+    "@rs-pdf/win32-x64-msvc": "*"
   },
   "napi": {
     "binaryName": "rs-pdf",
